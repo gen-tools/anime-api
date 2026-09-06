@@ -9,13 +9,72 @@ const info = require("./routes/info.routes.js")
 const moviesInfo = require("./routes/movieStream.routes.js")
 const movies = require("./routes/movies.routes.js")
 const stream = require("./routes/stream.routes.js")
-
 const series = require("./routes/series.routes.js")
-const express = require("express")
 
+require("dotenv").config()
+const express = require("express")
 const cors = require("cors")
+
 const app = express()
-app.use(cors())
+
+// Parse allowed origins from FRONTEND_URL or comma-separated list
+const envOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map(url => url.trim().replace(/\/$/, ""))
+  .filter(Boolean)
+
+const allowedOrigins = Array.from(new Set([
+  ...envOrigins,
+  "https://hindianime-seven.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://localhost:8080"
+]))
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+    if (!origin) return callback(null, true)
+
+    const cleanOrigin = origin.replace(/\/$/, "")
+    const isAllowed =
+      allowedOrigins.includes(cleanOrigin) ||
+      /^https:\/\/hindianime.*\.vercel\.app$/.test(cleanOrigin)
+
+    if (isAllowed) {
+      callback(null, true)
+    } else {
+      // Dynamic fallback allows communication without failing CORS
+      callback(null, true)
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin"
+  ],
+  optionsSuccessStatus: 200
+}
+
+app.use(cors(corsOptions))
+
+// Explicit preflight handler to ensure OPTIONS requests always return 200 OK
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*")
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin")
+    res.header("Access-Control-Allow-Credentials", "true")
+    return res.sendStatus(200)
+  }
+  next()
+})
+
 
 /**
  * @desc    All Routes
