@@ -4,7 +4,7 @@ const DEFAULT_HEADERS = {
   "Accept":
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
-  "Referer": "https://toonstream.dad/",
+  "Referer": "https://animesalt.cx/",
   "Connection": "keep-alive",
 };
 
