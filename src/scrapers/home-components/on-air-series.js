@@ -16,8 +16,9 @@ async function scrapeLatestSeries() {
       if (!li.hasClass("series")) return; // skip if not a series
 
       const anime_id = extractPathSlug(li.find(".lnk-blk").attr("href"), "series");
-      const poster = "https:" + li.find("img").attr("data-src");
-      const title = li.find("img").attr("alt").replace("Image ","");
+      const rawPoster = li.find("img").attr("data-src") || li.find("img").attr("src") || "";
+      const poster = rawPoster.startsWith("//") ? "https:" + rawPoster : rawPoster;
+      const title = (li.find("img").attr("alt") || "").replace("Image ","");
 
       results.push({ title, anime_id, poster});
     });

@@ -18,8 +18,9 @@ async function scrapeAnimeMovies() {
       if (li.hasClass("type-movies") && li.hasClass("category-anime")) {
         const title = li.find("img").attr("alt")?.trim().replace("Image ", "") || null;
         const anime_id = extractPathSlug(li.find(".lnk-blk").attr("href"), "movies");
-        const poster = li.find("img").attr("data-src")
-          ? "https:" + li.find("img").attr("data-src")
+        const rawPoster = li.find("img").attr("data-src") || li.find("img").attr("src") || "";
+        const poster = rawPoster
+          ? (rawPoster.startsWith("//") ? "https:" + rawPoster : rawPoster)
           : null;
         results.push({ title, anime_id, poster });
       }

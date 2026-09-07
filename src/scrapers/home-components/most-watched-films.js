@@ -14,7 +14,10 @@ const Most_filmsScraper = async () => {
                 rank: $(el).find(".chart-number").text().trim(),
                 title: $(el).find(".chart-title").text().trim(),
                 anime_id: extractPathSlug($(el).find(".chart-poster").attr("href"), "movies"),
-                poster: $(el).find(".chart-poster img").attr("data-src").replace("//", "https://")
+                poster: (function() {
+                  const raw = $(el).find(".chart-poster img").attr("data-src") || $(el).find(".chart-poster img").attr("src") || "";
+                  return raw.startsWith("//") ? "https:" + raw : raw;
+                })()
             })
         })
 

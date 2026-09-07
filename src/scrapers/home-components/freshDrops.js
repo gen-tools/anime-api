@@ -13,7 +13,8 @@ const freshdropScraper = async () => {
     $(".latest-ep-swiper-slide").each((i, el) => {
       const title = $(el).find(".entry-title").text().trim();
       const anime_id = extractPathSlug($(el).find(".lnk-blk").attr("href"), "series");
-      const poster = "https:" + $(el).find("img").attr("data-src");
+      const rawPoster = $(el).find("img").attr("data-src") || $(el).find("img").attr("src") || "";
+      const poster = rawPoster.startsWith("//") ? "https:" + rawPoster : rawPoster;
       const season = $(el).find(".post-ql").text().replace("Season","").trim();
       const episode = $(el).find(".year").text().trim().replace("EP:","");
 

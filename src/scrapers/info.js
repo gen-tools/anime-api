@@ -28,8 +28,8 @@ const infiScraper = async (anime_id) => {
         const seasons = $(".seasons").text().trim().replace("Seasons", "").trim();
         const episodes = $(".entry-meta .episodes").text().trim().replace("Episodes", "").trim();
         const rating = $(".vote-cn .vote").text().replace("TMDB", "").trim();
-        let poster = $(".post-thumbnail img").attr("src")
-        poster = "https:" + poster
+        const rawPoster = $(".post-thumbnail img").attr("src") || $(".post-thumbnail img").attr("data-src") || "";
+        const poster = rawPoster.startsWith("//") ? "https:" + rawPoster : rawPoster;
         const  results = {
             title,
             anime_id,
