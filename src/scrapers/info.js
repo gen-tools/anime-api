@@ -1,11 +1,12 @@
-const { default: axios } = require("axios");
 const cheerio = require("cheerio");
 const url = require("../utils/Base_V5");
-const header = require("../configs/headers");
+const { fetchAnimeSaltHtml } = require("../utils/animeSaltProxy");
 
 const infiScraper = async (anime_id) => {
     try {
-        const { data } = await axios.get(`${url}/series/${anime_id}/`, { headers: header });
+        const safeId = String(anime_id || "").trim();
+        if (!/^[a-z0-9-]+$/i.test(safeId)) return null;
+        const data = await fetchAnimeSaltHtml(`${url}/series/${encodeURIComponent(safeId)}/`);
         const $ = cheerio.load(data);
 
         const title = $(".fg1 .entry-title").text().trim();

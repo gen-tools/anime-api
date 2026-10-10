@@ -1,12 +1,11 @@
-const { default: axios } = require("axios");
 const cheerio = require("cheerio");
 const url = require("../../utils/Base_V1.js");
-const headers = require("../../configs/headers.js");
 const { extractPathSlug, upstreamError } = require("../../utils/scraperUtils.js");
+const { fetchAnimeSaltHtml } = require("../../utils/animeSaltProxy.js");
 
 const Most_seriesScraper = async () => {
     try {
-        const { data } = await axios.get(url, { headers, timeout: 10000 });
+        const data = await fetchAnimeSaltHtml(url);
         const $ = await cheerio.load(data);
         const results = [];
         $("#torofilm_wdgt_popular-3-all .chart-item").each((i, el) => {

@@ -1,26 +1,16 @@
-const axios = require("axios");
 const cheerio = require("cheerio");
 const baseUrl = require("../utils/Base_V5");
-const headers = require("../configs/headers");
-
-const PROXY_URL = "https://wispy-cherry-6934.shahazaibseo038.workers.dev/?url=";
+const { fetchAnimeSaltHtml } = require("../utils/animeSaltProxy");
 
 const episodeScraper = async (slug, season = 1) => {
   try {
-    const url = `${baseUrl}/episode/${slug}-${season}x1/`;
-
-    let data;
-    try {
-      const res = await axios.get(url, { headers, timeout: 8000 });
-      data = res.data;
-    } catch {
-      // Cloudflare worker proxy fallback for resilient scraping
-      const proxyRes = await axios.get(`${PROXY_URL}${encodeURIComponent(url)}`, {
-        headers,
-        timeout: 12000,
-      });
-      data = proxyRes.data;
+    const safeSlug = String(slug || "").trim();
+    const seasonNumber = Number(season || 1);
+    if (!/^[a-z0-9-]+$/i.test(safeSlug) || !Number.isSafeInteger(seasonNumber) || seasonNumber < 1) {
+      return null;
     }
+    const episodeUrl = `${baseUrl}/episode/${encodeURIComponent(safeSlug)}-${seasonNumber}x1/`;
+    const data = await fetchAnimeSaltHtml(episodeUrl, { timeout: 12000 });
 
     const $ = cheerio.load(data);
 

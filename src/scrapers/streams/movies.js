@@ -1,8 +1,7 @@
-const { default: axios } = require("axios");
 const cheerio = require("cheerio")
 const url = require("../../utils/Base_V5.js")
-const header = require("../../configs/headers")
 const helper = require("./helper")
+const { fetchAnimeSaltHtml } = require("../../utils/animeSaltProxy")
 
 const infiScraper = async (anime_id) => {
     try {
@@ -18,9 +17,9 @@ const infiScraper = async (anime_id) => {
         let data, fetchUrl;
         for (const testUrl of urlsToTry) {
             try {
-                const response = await axios.get(testUrl, { headers: header, timeout: 10000 });
-                if (response?.data) {
-                    data = response.data;
+                const responseData = await fetchAnimeSaltHtml(testUrl);
+                if (responseData) {
+                    data = responseData;
                     fetchUrl = testUrl;
                     break;
                 }

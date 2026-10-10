@@ -1,8 +1,7 @@
-const { default: axios } = require("axios")
 const cheerio = require("cheerio")
 const url = require("../utils/Base_V5.js")
-const Header = require("../configs/headers.js")
 const { extractPathSlug, upstreamError } = require("../utils/scraperUtils.js")
+const { fetchAnimeSaltHtml } = require("../utils/animeSaltProxy.js")
 
 const genreScraper = async (genre, page = 1) => {
     try {
@@ -24,7 +23,7 @@ const genreScraper = async (genre, page = 1) => {
         const fetchUrl = `${url}/category/${slug}/page/${page}/`
         console.log("Fetching Genre URL:", fetchUrl);
         
-        const { data } = await axios.get(fetchUrl, { headers: Header, timeout: 10000 })
+        const data = await fetchAnimeSaltHtml(fetchUrl)
         const $ = await cheerio.load(data)
         const anime = []
         

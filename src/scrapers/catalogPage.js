@@ -51,7 +51,43 @@ const normalizePoster = (poster) => {
   return poster.startsWith("//") ? `https:${poster}` : poster
 }
 
-const parseCatalogHtml = (html, kind, requestedPage) => {
+const parseCatalogHtml = (html, kind, requestedPage, responseHeaders = null) => {
+  if (/<rss\b/i.test(html)) {
+    const $ = cheerio.load(html, { xmlMode: true })
+    const items = []
+
+    $("item").each((_, element) => {
+      const item = $(element)
+      const title = item.find("title").first().text().trim()
+      const href = item.find("link").first().text().trim()
+      const animeId = extractCatalogSlug(href, kind)
+      if (!animeId || !title) return
+      items.push({ title, anime_id: animeId, poster: null })
+    })
+
+    const reportedTotalPages = Number(responseHeader(responseHeaders, "x-catalog-total-pages"))
+    const reportedPageSize = Number(responseHeader(responseHeaders, "x-catalog-page-size"))
+    const hasReportedTotal = Number.isSafeInteger(reportedTotalPages) && reportedTotalPages > 0
+    const hasReportedPageSize = Number.isSafeInteger(reportedPageSize) && reportedPageSize > 0
+    const totalPages = hasReportedTotal
+      ? reportedTotalPages
+      : items.length > 0 && (!hasReportedPageSize || items.length >= reportedPageSize)
+        ? requestedPage + 1
+        : requestedPage
+
+    return {
+      catalog: { currentPage: requestedPage, totalPages, results: items },
+      diagnostics: {
+        articleCount: 0,
+        feedItemCount: $("item").length,
+        parsedItemCount: items.length,
+        paginationLinkCount: 0,
+        paginationValueCount: hasReportedTotal ? 1 : 0,
+        totalPages,
+      },
+    }
+  }
+
   const $ = cheerio.load(html)
   const articles = $(ARTICLE_SELECTOR)
   const items = []
@@ -115,8 +151,9 @@ const scrapeCatalogPage = async (kind, page = 1) => {
   }
 
   const pageNumber = normalizePage(page)
-  const upstreamPath = `/${kind}/page/${pageNumber}/`
-  const upstreamUrl = `https://animesalt.cx${upstreamPath}`
+  const upstreamPath = pageNumber === 1
+    ? `/${kind}/feed/`
+    : `/${kind}/feed/?paged=${pageNumber}`
   const workerUrl = new URL(CATALOG_WORKER_URL)
   workerUrl.searchParams.set("kind", kind)
   workerUrl.searchParams.set("page", String(pageNumber))
@@ -151,11 +188,11 @@ const scrapeCatalogPage = async (kind, page = 1) => {
       errorName: error?.name || "Error",
       errorMessage: safeErrorMessage(error),
     })
-    throw upstreamError(`${kind} scraper`, upstreamUrl, error)
+    throw upstreamError(`${kind} scraper`, workerUrl.toString(), error)
   }
 
   const html = typeof response.data === "string" ? response.data : String(response.data ?? "")
-  const parsed = parseCatalogHtml(html, kind, pageNumber)
+  const parsed = parseCatalogHtml(html, kind, pageNumber, response.headers)
   const contentLength = Buffer.byteLength(html, "utf8")
   const hasItems = parsed.catalog.results.length > 0
 

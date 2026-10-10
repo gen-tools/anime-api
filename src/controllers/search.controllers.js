@@ -9,20 +9,30 @@ const searchController = async (req, res, next) => {
       res.status(400)
       throw new Error("Keyword is required")
     }
-    const cachedData = await redis.get(key)
-    if(cachedData){
+    const cachedValue = await redis.get(key)
+    let cachedData = cachedValue
+    if (typeof cachedData === "string") {
+      try {
+        cachedData = JSON.parse(cachedData)
+      } catch {
+        cachedData = null
+      }
+    }
+    if (Array.isArray(cachedData?.results) && cachedData.results.length > 0) {
       return res.json({
         success: true,
         results: cachedData
       })
     }
+    if (cachedValue) await redis.del(key)
+
     const results = await searchScraper(keyword, page)
     if (results == null) {
       throw new Error("search controller: scraper returned no result")
     }
-    await redis.set(key,JSON.stringify(results),{
-      ex: 120
-    })
+    if (Array.isArray(results.results) && results.results.length > 0) {
+      await redis.set(key, JSON.stringify(results), { ex: 120 })
+    }
     res.json({
       success: true,
       mmessage: "Data Found!!",

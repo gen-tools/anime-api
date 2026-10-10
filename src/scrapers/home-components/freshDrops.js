@@ -1,12 +1,11 @@
-const { default: axios } = require("axios");
 const cheerio = require("cheerio");
 const url = require("../../utils/Base_V1.js"); // make sure this exports a string URL
-const headers = require("../../configs/headers.js");
 const { extractPathSlug, upstreamError } = require("../../utils/scraperUtils.js");
+const { fetchAnimeSaltHtml } = require("../../utils/animeSaltProxy.js");
 
 const freshdropScraper = async () => {
   try {
-    const { data } = await axios.get(url, { headers, timeout: 10000 });
+    const data = await fetchAnimeSaltHtml(url);
     const $ = cheerio.load(data);
     const results = [];
 
