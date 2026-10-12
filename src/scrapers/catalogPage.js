@@ -2,7 +2,7 @@ const cheerio = require("cheerio")
 const Header = require("../configs/headers.js")
 const { extractPathSlug, upstreamError } = require("../utils/scraperUtils.js")
 
-const CATALOG_WORKER_URL = "https://wispy-cherry-6934.shahazaibseo038.workers.dev/catalog"
+const CATALOG_WORKER_URL = "https://wispy-cherry-6934.sheztech.workers.dev/catalog"
 const ARTICLE_SELECTOR = "article.post"
 
 const responseHeader = (headers, name) =>
@@ -151,9 +151,7 @@ const scrapeCatalogPage = async (kind, page = 1) => {
   }
 
   const pageNumber = normalizePage(page)
-  const upstreamPath = pageNumber === 1
-    ? `/${kind}/feed/`
-    : `/${kind}/feed/?paged=${pageNumber}`
+  const upstreamPath = `/${kind}/page/${pageNumber}/`
   const workerUrl = new URL(CATALOG_WORKER_URL)
   workerUrl.searchParams.set("kind", kind)
   workerUrl.searchParams.set("page", String(pageNumber))

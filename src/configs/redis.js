@@ -13,6 +13,7 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   }
 }
 
+
 // Resilient wrapper: if redis is not configured or errors, return null so API routes can scrape directly without crashing
 const safeRedis = {
   get: async (key) => {
