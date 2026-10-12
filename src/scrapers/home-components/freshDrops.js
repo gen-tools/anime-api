@@ -3,9 +3,9 @@ const url = require("../../utils/Base_V1.js"); // make sure this exports a strin
 const { extractPathSlug, upstreamError } = require("../../utils/scraperUtils.js");
 const { fetchAnimeSaltHtml } = require("../../utils/animeSaltProxy.js");
 
-const freshdropScraper = async () => {
+const freshdropScraper = async (homepageHtml) => {
   try {
-    const data = await fetchAnimeSaltHtml(url);
+    const data = typeof homepageHtml === "string" ? homepageHtml : await fetchAnimeSaltHtml(url);
     const $ = cheerio.load(data);
     const results = [];
 

@@ -33,6 +33,16 @@ const safeRedis = {
       return null
     }
   },
+  setIfAbsent: async (key, value, options = {}) => {
+    if (!redisClient) return null
+    try {
+      const result = await redisClient.set(key, value, { ...options, nx: true })
+      return result === "OK"
+    } catch (err) {
+      console.warn(`Redis SET NX error for key ${key}:`, err.message)
+      return null
+    }
+  },
   del: async (key) => {
     if (!redisClient) return null
     try {

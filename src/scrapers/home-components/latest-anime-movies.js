@@ -3,9 +3,9 @@ const URL = require("../../utils/Base_V1.js");
 const { extractPathSlug, upstreamError } = require("../../utils/scraperUtils.js");
 const { fetchAnimeSaltHtml } = require("../../utils/animeSaltProxy.js");
 
-async function scrapeAnimeMovies() {
+async function scrapeAnimeMovies(homepageHtml) {
   try {
-    const data = await fetchAnimeSaltHtml(URL);
+    const data = typeof homepageHtml === "string" ? homepageHtml : await fetchAnimeSaltHtml(URL);
     const $ = cheerio.load(data);
 
     const results = [];
